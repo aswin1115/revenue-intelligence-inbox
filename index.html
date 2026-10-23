@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Revenue Intelligence Inbox | Volopay</title>
+  <meta name="description" content="Revenue Intelligence Inbox — Manager-grade AI-powered conversation analysis, routing, and daily brief for the Volopay sales team. Date-scoped to 21 August 2026 (Asia/Kolkata)." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-base: #0a0b0f;
+      --bg-surface: #111318;
+      --bg-elevated: #191c24;
+      --bg-hover: #1e2230;
+      --bg-active: #252a3a;
+      --border: #1e2535;
+      --border-light: #252d42;
+      --text-primary: #e8eaf0;
+      --text-secondary: #8b92a8;
+      --text-muted: #5a6178;
+      --accent: #4f7cff;
+      --accent-glow: rgba(79,124,255,0.18);
+      --accent-soft: rgba(79,124,255,0.12);
+      --green: #22c55e;
+      --green-soft: rgba(34,197,94,0.15);
+      --amber: #f59e0b;
+      --amber-soft: rgba(245,158,11,0.15);
+      --red: #ef4444;
+      --red-soft: rgba(239,68,68,0.15);
+      --purple: #a855f7;
+      --purple-soft: rgba(168,85,247,0.15);
+      --cyan: #06b6d4;
+      --cyan-soft: rgba(6,182,212,0.15);
+      --orange: #f97316;
+      --orange-soft: rgba(249,115,22,0.15);
+      --scrollbar-w: 6px;
+    }
+    html { font-size: 14px; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-base); color: var(--text-primary); min-height: 100vh; overflow: hidden; }
+    ::-webkit-scrollbar { width: var(--scrollbar-w); height: var(--scrollbar-w); }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a3050; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3a4268; }
+    #root { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    .tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; white-space: nowrap; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: none; outline: none; transition: all 0.18s ease; letter-spacing: 0.2px; white-space: nowrap; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 0 20px rgba(79,124,255,0.35); }
+    .btn-primary:hover { background: #6b93ff; box-shadow: 0 0 28px rgba(79,124,255,0.5); }
+    .btn-secondary { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border-light); }
+    .btn-secondary:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--accent); }
+    .btn-danger { background: var(--red-soft); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+    .btn-danger:hover { background: rgba(239,68,68,0.25); }
+    .btn-success { background: var(--green-soft); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+    .btn-success:hover { background: rgba(34,197,94,0.25); }
+    .btn-amber { background: var(--amber-soft); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+    .btn-amber:hover { background: rgba(245,158,11,0.25); }
+    select, textarea, input { background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-light); border-radius: 8px; font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.15s; }
+    select:focus, textarea:focus, input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    select { padding: 7px 10px; cursor: pointer; }
+    select option { background: var(--bg-elevated); }
+    .pulse { animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+    .fade-in { animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+    .slide-right { animation: slideRight 0.2s ease; }
+    @keyframes slideRight { from { opacity:0; transform:translateX(12px); } to { opacity:1; transform:translateX(0); } }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .gradient-text { background: linear-gradient(135deg, #4f7cff 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useMemo, useRef } = React;
+
+/* ============================================================
+   EMBEDDED DATA
+   ============================================================ */
+const BATCH_01 = {"batch_id":"01_initial","batch_date":"2026-08-21","timezone":"Asia/Kolkata","records":[{"source_type":"call","source_id":"a1b2c3d4-0001-4abc-8def-000000000001","record_ref":"C01","revision":1,"company":"Nexus Retail Pvt Ltd","rep_name":"Arjun Mehta","timestamp":"2026-08-21T09:05:00+05:30","duration_seconds":312,"has_transcript":true,"is_silent":false,"auto_route":"Sales Coaching","transcript":"Arjun Mehta: Good morning! May I speak with Mr. Kapoor?\nProspect: Speaking.\nArjun Mehta: Hi Mr. Kapoor, this is Arjun from Volopay. I was hoping to connect about your expense management needs.\nProspect: We already use a tool. Not interested.\nArjun Mehta: Totally understand! Could I ask which tool, just for my knowledge?\nProspect: I'd rather not say. Please remove me from your list.\nArjun Mehta: Of course, I'll do that right away. Sorry for interrupting your day.\nProspect: No worries. Bye.\nArjun Mehta: Have a great day!","ai_summary":{"executive":"Cold call to Nexus Retail resulting in an immediate rejection. Prospect cited existing tooling and requested removal from outreach list.","evidence":"Prospect stated: 'We already use a tool. Not interested.' and 'Please remove me from your list.'","negative_scope":"No information about the competitor tool used. No indication of future interest or re-engagement window. No pain point surfaced.","action_items":"Arjun Mehta to remove Mr. Kapoor (Nexus Retail) from outreach list immediately. Manager to review cold call opener script with Arjun — no value proposition was delivered before the prospect disengaged."}},{"source_type":"call","source_id":"a1b2c3d4-0002-4abc-8def-000000000002","record_ref":"C02","revision":1,"company":"Bluewave Technologies","rep_name":"Priya Sharma","timestamp":"2026-08-21T09:20:00+05:30","duration_seconds":784,"has_transcript":true,"is_silent":false,"auto_route":"Deal Next Steps","transcript":"Priya Sharma: Hi Sarah, thanks for picking up. This is Priya from Volopay.\nSarah Chen: Oh Priya! Yes, we were expecting your call. Our CFO Ravi is also on the line.\nRavi Patel: Hi Priya. We reviewed the proposal you sent last week.\nPriya Sharma: Great! Any questions from your end?\nRavi Patel: We like the spend analytics dashboard. But we have 3 entities across India, Singapore, and Dubai. Can the platform handle multi-entity consolidation?\nPriya Sharma: Absolutely. Multi-entity is a core feature. You can have separate entity wallets with consolidated reporting at the group level.\nSarah Chen: That's exactly what we need. What about local compliance? Singapore GST, UAE VAT?\nPriya Sharma: Yes, our compliance module handles both. It auto-categorizes transactions for GST and VAT filing.\nRavi Patel: Impressive. What would be the implementation timeline for 3 entities?\nPriya Sharma: Typically 4–6 weeks for full onboarding with 3 entities. We assign a dedicated implementation manager.\nRavi Patel: Good. We'll need to loop in our IT head before finalizing. Can you send a technical architecture document?\nPriya Sharma: Of course, I'll send it today. Should we schedule a technical deep-dive call for next week?\nRavi Patel: Yes, please. Thursday works for us.\nPriya Sharma: Perfect. I'll block Thursday 3 PM IST. Thank you both!","ai_summary":{"executive":"Qualified discovery-to-proposal call with Bluewave Technologies CFO and Finance Director. Multi-entity support confirmed as a key requirement. Strong buying signals — requesting technical documentation and scheduling a follow-up technical deep-dive.","evidence":"CFO Ravi Patel: 'We like the spend analytics dashboard... Can the platform handle multi-entity consolidation?' Confirmed follow-up: 'Can you send a technical architecture document?' and agreed to Thursday deep-dive.","negative_scope":"No signed LOI or verbal commitment to purchase. IT head has not yet been consulted — technical blockers may emerge. Pricing negotiation has not commenced.","action_items":"Priya Sharma to send technical architecture document today. Block Thursday 3 PM IST for technical deep-dive with Bluewave IT head + CFO team."}},{"source_type":"call","source_id":"a1b2c3d4-0003-4abc-8def-000000000003","record_ref":"C03","revision":1,"company":"Meridian Pharma","rep_name":"Rohan Verma","timestamp":"2026-08-21T09:45:00+05:30","duration_seconds":540,"has_transcript":true,"is_silent":false,"auto_route":"Deal Next Steps","transcript":"Rohan Verma: Hello Dr. Mishra, this is Rohan from Volopay. How are you doing today?\nDr. Mishra: I'm well, Rohan. We've been looking at your platform closely.\nRohan Verma: Glad to hear it. Is there anything specific you'd like to revisit?\nDr. Mishra: Yes — the approval workflow. Our procurement team needs 3-level approval before any spend above ₹50,000. Does that exist?\nRohan Verma: Yes, you can configure multi-level approval workflows with custom spend thresholds. It's fully parameterizable.\nDr. Mishra: Good. Our CFO is travelling next week. Can we close the paperwork after the 28th?\nRohan Verma: Of course. I'll prepare the MSA and data processing agreement for your review this week, so you have time to read through before the 28th.\nDr. Mishra: That works. Also, will there be a UAT environment?\nRohan Verma: Yes, we provide a sandbox UAT environment for all enterprise clients. Typically 2 weeks before go-live.\nDr. Mishra: Excellent. We're close to a decision, Rohan. You'll hear from us after CFO returns.\nRohan Verma: Thank you, Dr. Mishra. I'll send the documents today.","ai_summary":{"executive":"Strong late-stage deal conversation with Meridian Pharma. Prospect confirmed 3-level approval workflow requirement (met by Volopay). Deal expected to close after CFO returns from travel on 28 August.","evidence":"Dr. Mishra stated: 'We're close to a decision, Rohan. You'll hear from us after CFO returns.'","negative_scope":"Deal not yet signed. CFO approval is still pending — timeline contingent on return from travel. No pricing confirmed on this call.","action_items":"Rohan Verma to send MSA and DPA to Dr. Mishra today. Follow up after 28 August when CFO returns."}},{"source_type":"call","source_id":"a1b2c3d4-0004-4abc-8def-000000000004","record_ref":"C04","revision":1,"company":"Starfield Logistics","rep_name":"Sneha Patel","timestamp":"2026-08-21T10:00:00+05:30","duration_seconds":621,"has_transcript":true,"is_silent":false,"auto_route":"Deal Next Steps","transcript":"Sneha Patel: Hi Anand, Sneha here from Volopay. Do you have 10 minutes?\nAnand Kumar: Sure, Sneha. We actually had a team discussion about your platform yesterday.\nSneha Patel: That's great to hear! Any specific outcomes from the discussion?\nAnand Kumar: Mostly positive. The card issuance feature is exactly what our field ops team needs — they're spending on fuel and tolls daily.\nSneha Patel: Perfect. Prepaid cards for field ops with spend limits and category locks is something we do really well.\nAnand Kumar: Right. But our finance team is asking about credit — can field cards run on a credit line rather than prepaid?\nSneha Patel: Yes, we offer corporate credit cards with a shared credit line. The limit is subject to an eligibility assessment.\nAnand Kumar: What determines eligibility?\nSneha Patel: We look at company revenue, vintage, and banking history. Starfield Logistics should qualify for a decent limit given your scale.\nAnand Kumar: Our last fiscal revenue was ₹85 crores. That should be fine, right?\nSneha Patel: That's encouraging — though final assessment is done by our credit team. I can initiate the credit assessment if you'd like.\nAnand Kumar: Yes, please do. When can we expect a decision?\nSneha Patel: Typically 3–5 business days post application.\nAnand Kumar: Alright. Send me the application link.\nSneha Patel: Will do immediately after this call!","ai_summary":{"executive":"Positive discovery call with Starfield Logistics field ops use-case. Prospect wants corporate credit cards for fuel/toll spend. Credit assessment to be initiated.","evidence":"Anand Kumar: 'The card issuance feature is exactly what our field ops team needs.' Agreed to start credit assessment. Revenue stated as ₹85 crores.","negative_scope":"Credit eligibility is NOT confirmed — subject to formal credit team assessment. No deal signed or verbal commitment given beyond 'initiate assessment'.","action_items":"Sneha Patel to send credit assessment application link to Anand Kumar immediately. Credit team to run assessment within 3–5 business days."}},{"source_type":"call","source_id":"a1b2c3d4-0005-4abc-8def-000000000005","record_ref":"C05","revision":1,"company":"Cascade Fintech","rep_name":"Vikram Singh","timestamp":"2026-08-21T10:30:00+05:30","duration_seconds":890,"has_transcript":true,"is_silent":false,"auto_route":"Deal Next Steps","transcript":"Vikram Singh: Hi Neha, Vikram from Volopay. How's the evaluation going?\nNeha Joshi: Hi Vikram! Actually quite well. Our team loves the demo. The accounts payable automation is a big draw.\nVikram Singh: Great feedback. Any remaining concerns?\nNeha Joshi: Pricing. We're a 150-person fintech, and the per-card pricing feels steep if we scale to all employees.\nVikram Singh: Understood. At your scale, you'd move to an enterprise tier with volume discounts. What's your expected card count?\nNeha Joshi: Roughly 200 virtual + 80 physical.\nVikram Singh: At that volume, I can work with our pricing team to give you a blended rate. I'm confident we can make it work.\nNeha Joshi: That would help. Also — we're regulated under RBI guidelines. Any compliance concerns?\nVikram Singh: None. We're RBI-regulated, PCI-DSS compliant, and our data centers are in India. All data stays onshore.\nNeha Joshi: Perfect. That's a hard requirement for us. Alright — if pricing comes in right, I think we can move forward.\nVikram Singh: Let me get custom pricing from our team by EOD tomorrow.\nNeha Joshi: Sounds good. Looking forward to it!","ai_summary":{"executive":"Advanced evaluation stage with Cascade Fintech. Strong product fit confirmed. Pricing is the only remaining blocker. Custom pricing proposal to be issued EOD tomorrow.","evidence":"Neha Joshi: 'If pricing comes in right, I think we can move forward.' Volume confirmed: 200 virtual + 80 physical cards.","negative_scope":"No pricing commitment made on this call. Deal is conditional on custom pricing approval by Volopay pricing team. No contract or LOI issued.","action_items":"Vikram Singh to get custom pricing from pricing team and send to Neha Joshi by EOD 22 August 2026."}},{"source_type":"call","source_id":"a1b2c3d4-0006-4abc-8def-000000000006","record_ref":"C06","revision":1,"company":"Ironclad Manufacturing","rep_name":"Kavya Nair","timestamp":"2026-08-21T10:50:00+05:30","duration_seconds":430,"has_transcript":true,"is_silent":false,"auto_route":"Sales Coaching","transcript":"Kavya Nair: Good morning! Is this Mr. Desai from Ironclad?\nMr. Desai: Yes, who's this?\nKavya Nair: This is Kavya from Volopay — we help manufacturing companies streamline expense management and procurement workflows.\nMr. Desai: We manage expenses just fine with our ERP. No need for another tool.\nKavya Nair: Of course, many of our clients have ERP systems too. We actually integrate with SAP and Oracle. The value add is real-time card controls and analytics on top of your existing ERP.\nMr. Desai: Sounds like a solution looking for a problem. We're not interested.\nKavya Nair: Fair enough, Mr. Desai. If you ever reconsider, I'm happy to share a case study from a similar manufacturer.\nMr. Desai: Sure. Email is fine.\nKavya Nair: I'll send it right away. Thank you for your time!","ai_summary":{"executive":"Cold call rejection from Ironclad Manufacturing. Prospect dismissed product as unnecessary given existing ERP. Agreed to receive a case study via email.","evidence":"Mr. Desai: 'Sounds like a solution looking for a problem. We're not interested.' Later: 'Email is fine.'","negative_scope":"No buying interest expressed. Case study email does not constitute engagement or a sales opportunity.","action_items":"Kavya Nair to send manufacturing ERP-integration case study to Mr. Desai. Manager to review pitch — ERP objection handling needs strengthening."}},{"source_type":"call","source_id":"a1b2c3d4-0007-4abc-8def-000000000007","record_ref":"C07","revision":1,"company":"Prism Digital Media","rep_name":"Arjun Mehta","timestamp":"2026-08-21T11:10:00+05:30","duration_seconds":712,"has_transcript":true,"is_silent":false,"auto_route":"Deal Next Steps","transcript":"Arjun Mehta: Hi Pallavi, hope you're doing well. Arjun from Volopay.\nPallavi Rao: Hi Arjun! Yes, we've been meaning to call you. Our ad spend is out of control — we need better controls.\nArjun Mehta: That's exactly what we solve. Tell me more — what does your current ad spend workflow look like?\nPallavi Rao: We have 12 media buyers who each have access to a shared credit card. Reconciliation is a nightmare.\nArjun Mehta: With Volopay, each media buyer gets their own virtual card with a spend limit and category lock to ad platforms only. No shared cards.\nPallavi Rao: That would be a game changer. What about the reporting — can we see spend per buyer, per campaign?\nArjun Mehta: Yes, full drill-down. You can see spend by person, vendor, date range, or custom tags.\nPallavi Rao: Perfect. How long would it take to get us set up?\nArjun Mehta: For a 12-person team, about a week. We'll assign an onboarding manager.\nPallavi Rao: We'd like to move fast. Can we start the sign-up process this week?\nArjun Mehta: Absolutely. I'll send you the onboarding link today.\nPallavi Rao: Great, looking forward to it!","ai_summary":{"executive":"High-intent inbound-style call with Prism Digital Media. Media agency with 12 buyers and out-of-control shared credit card spend. Prospect eager to sign up this week.","evidence":"Pallavi Rao: 'Can we start the sign-up process this week?' and 'Great, looking forward to it!'","negative_scope":"No contract signed. Onboarding link not yet sent at time of call. Final decision-maker (CFO/CEO) not confirmed as involved.","action_items":"Arjun Mehta to send onboarding link to Pallavi Rao today. Flag as high-velocity deal — target close this week."}},{"source_type":"call","source_id":"a1b2c3d4-0008-4abc-8def-000000000008","record_ref":"C08","revision":1,"company":"Quantum Energy Solutions","rep_name":"Priya Sharma","timestamp":"2026-08-21T11:35:00+05:30","duration_seconds":556,"has_transcript":true,"is_silent":false,"auto_route":"Customer Escalation / Bug","transcript":"Priya Sharma: Hi Deepak, Priya from Volopay. How are you finding the platform so far?\nDeepak Nair: Honestly, Priya, we've had a rough week. Three of our card transactions were declined without any reason shown in the dashboard.\nPriya Sharma: I'm really sorry to hear that, Deepak. Let me pull up your account. Can you share the transaction dates?\nDeepak Nair: August 18, 19, and 20. All were vendor payments — all declined. We had credit available.\nPriya Sharma: I can see them — these were declined due to a system-side velocity check that was incorrectly applied. This should not have happened.\nDeepak Nair: We nearly missed a supplier payment because of this. This is serious.\nPriya Sharma: Absolutely, I fully understand the severity. I'm escalating this right now to our payments ops team. You should receive a call within 2 hours.\nDeepak Nair: Please make sure this doesn't happen again. We are in our first month of usage.\nPriya Sharma: I give you my word. We'll also review the velocity configuration on your account and apply a fix today.\nDeepak Nair: Alright. I'll wait for the ops team's call.","ai_summary":{"executive":"Critical customer escalation — Quantum Energy Solutions experienced 3 transaction declines in their first month of use due to an incorrectly applied velocity check. Immediate escalation to payments ops required.","evidence":"Deepak Nair: 'Three of our card transactions were declined without any reason shown.' Priya confirmed: 'declined due to a system-side velocity check that was incorrectly applied.'","negative_scope":"Root cause is system-side, not user error. Fix not yet confirmed applied on this call. Customer satisfaction at serious risk given early-stage of relationship.","action_items":"Priya Sharma to escalate to payments ops immediately — ops team to call Deepak Nair within 2 hours. Velocity config to be reviewed and fixed today. Incident to be documented for post-mortem."}},{"source_type":"call","source_id":"a1b2c3d4-0009-4abc-8def-000000000009","record_ref":"C09","revision":1,"company":"UrbanRoot Agritech","rep_name":"Rohan Verma","timestamp":"2026-08-21T12:00:00+05:30","duration_seconds":460,"has_transcript":true,"is_silent":false,"auto_route":"Deal Next Steps","transcript":"Rohan Verma: Hi Sunita, this is Rohan from Volopay.\nSunita Reddy: Hi Rohan! We just completed our internal evaluation. Good news — we want to proceed.\nRohan Verma: That's wonderful to hear! What are the next steps from your side?\nSunita Reddy: Our legal team needs to review the MSA. Can you send a clean copy?\nRohan Verma: Absolutely, I'll send it by noon today. Is there a specific legal contact I should address it to?\nSunita Reddy: Yes — cc Rahul Gupta, our General Counsel, at r.gupta@urbanroot.in.\nRohan Verma: Got it. I'll address it to Rahul and cc you. Expected review time?\nSunita Reddy: 3–4 business days. Then we can sign.\nRohan Verma: Perfect. I'll also send our standard data processing addendum for DPDP compliance.\nSunita Reddy: Good thinking. We'll review both together.\nRohan Verma: Excellent. I'll send both documents in the next hour.","ai_summary":{"executive":"UrbanRoot Agritech confirmed they want to proceed after internal evaluation. MSA and DPA to be sent to legal team for 3–4 day review. Deal imminent.","evidence":"Sunita Reddy: 'We just completed our internal evaluation. Good news — we want to proceed.' and '3–4 business days. Then we can sign.'","negative_scope":"Contract not yet signed. Legal review may surface redlines or blockers. No implementation date confirmed.","action_items":"Rohan Verma to send MSA and DPA to Sunita Reddy and r.gupta@urbanroot.in within 1 hour. Follow up after 3–4 business days for legal sign-off."}},{"source_type":"call","source_id":"a1b2c3d4-0010-4abc-8def-000000000010","record_ref":"C10","revision":1,"company":"Orion Healthcare Group","rep_name":"Sneha Patel","timestamp":"2026-08-21T12:20:00+05:30","duration_seconds":380,"has_transcript":true,"is_silent":false,"auto_route":"Sales Coaching","transcript":"Sneha Patel: Good afternoon, this is Sneha from Volopay. May I please speak with Mr. Sharma?\nReceptionist: Mr. Sharma is in a meeting. Can I take a message?\nSneha Patel: Of course. Please tell him Sneha from Volopay called about our corporate card solution for healthcare. I'll try again this afternoon.\nReceptionist: I'll let him know.\nSneha Patel: Thank you. Have a great day.\n[Second attempt 2 hours later]\nSneha Patel: Hi, I called earlier for Mr. Sharma. This is Sneha from Volopay.\nMr. Sharma: Yes, what is this regarding?\nSneha Patel: We offer corporate expense management for healthcare groups — specifically helping manage vendor payments and reimbursements.\nMr. Sharma: We already handle this internally. Not something we're looking to change.\nSneha Patel: Understood. Could I send over some information on healthcare-specific use cases?\nMr. Sharma: Sure, send it to the general inbox. I'll look when I can.\nSneha Patel: Thank you, Mr. Sharma. Have a good day.","ai_summary":{"executive":"Gatekeeper difficulty and then weak engagement from Mr. Sharma at Orion Healthcare. No pain point expressed. Agreed to receive info to general inbox — low conversion signal.","evidence":"Mr. Sharma: 'We already handle this internally. Not something we're looking to change.'","negative_scope":"No buying interest. Info to general inbox is a soft rejection. No follow-up commitment from prospect.","action_items":"Sneha Patel to send healthcare-specific use case material to Orion Healthcare general inbox. Manager: review Sneha's gatekeeper navigation technique — second call opened without a compelling hook."}},{"source_type":"call","source_id":"a1b2c3d4-0011-4abc-8def-000000000011","record_ref":"C11","revision":1,"company":"Vertex Capital Partners","rep_name":"Vikram Singh","timestamp":"2026-08-21T12:45:00+05:30","duration_seconds":920,"has_transcript":true,"is_silent":false,"auto_route":"Deal Next Steps","transcript":"Vikram Singh: Hi Aarav, Vikram from Volopay. Good to connect again.\nAarav Mehta: Vikram! Yes — we've been comparing you to two other vendors. Can you help me understand your investment management module?\nVikram Singh: Of course. For PE/VC firms, we offer portfolio company card management — you can issue cards to portcos with your branding and controls.\nAarav Mehta: Interesting. We have 14 portfolio companies. Can each have a separate wallet with its own limits?\nVikram Singh: Yes. Each portco entity gets its own sub-account with isolated limits, reporting, and approval workflows.\nAarav Mehta: What about consolidated billing? Our finance team wants one invoice for all portcos.\nVikram Singh: Absolutely — consolidated billing at the master account level with entity-level drill-down reports.\nAarav Mehta: This is exactly what we need. The other vendors couldn't do consolidated billing properly.\nVikram Singh: That's a common gap we fill. Would you like a technical walkthrough with our solutions engineer?\nAarav Mehta: Yes. Let's do it next Monday.\nVikram Singh: I'll send a calendar invite for Monday morning.\nAarav Mehta: Perfect. Looking forward to it.","ai_summary":{"executive":"Strong competitive differentiation call with Vertex Capital Partners. Confirmed ability to support 14 portcos with consolidated billing — a capability competitors lacked. Technical walkthrough scheduled for Monday.","evidence":"Aarav Mehta: 'This is exactly what we need. The other vendors couldn't do consolidated billing properly.'","negative_scope":"No pricing discussed. Deal is still in competitive evaluation — two other vendors also being assessed. No commitment made.","action_items":"Vikram Singh to send Monday morning calendar invite for technical walkthrough with solutions engineer. Flag as high-priority competitive deal."}},{"source_type":"call","source_id":"a1b2c3d4-0012-4abc-8def-000000000012","record_ref":"C12","revision":1,"company":"Pinnacle Retail Chain","rep_name":"Kavya Nair","timestamp":"2026-08-21T13:05:00+05:30","duration_seconds":648,"has_transcript":true,"is_silent":false,"auto_route":"Customer Escalation / Bug","transcript":"Kavya Nair: Hi Mrs. Pillai, Kavya from Volopay. Is this a good time?\nMrs. Pillai: Kavya — I was about to call you. Our store managers cannot add receipts to transactions on the mobile app. It crashes every time.\nKavya Nair: I'm so sorry to hear that. When did this start?\nMrs. Pillai: Two days ago. It's affecting 24 store locations. Managers can't submit expense reports.\nKavya Nair: This is definitely a priority issue. I'm logging a P1 ticket right now. Can you tell me the device type and OS version?\nMrs. Pillai: All Android — mostly Samsung, Android 14.\nKavya Nair: Got it. Our engineering team has an open bug on receipt upload on Android 14. A patch was deployed yesterday — but it may need a force reinstall.\nMrs. Pillai: Nobody told us about this. We spent 2 days troubleshooting.\nKavya Nair: I sincerely apologize. I should have proactively informed you. I'll send the reinstall steps to all 24 store managers immediately. And I'll escalate for a credit on your next invoice for the disruption.\nMrs. Pillai: The credit would be appreciated. Please make sure this doesn't happen again.\nKavya Nair: Absolutely, Mrs. Pillai. I'll also ensure you're on our proactive incident notification list going forward.","ai_summary":{"executive":"Customer escalation — Pinnacle Retail Chain (24 locations) experienced 2-day disruption due to Android 14 receipt upload crash bug. Patch exists; customer not proactively notified. Invoice credit offered.","evidence":"Mrs. Pillai: 'Our store managers cannot add receipts to transactions on the mobile app. It crashes every time.' Kavya confirmed: 'Our engineering team has an open bug on receipt upload on Android 14.'","negative_scope":"Credit amount not quantified. Whether all 24 managers will successfully reinstall is unconfirmed. Root cause of notification gap (no proactive comms) not addressed at process level.","action_items":"Kavya Nair to send Android 14 reinstall instructions to all 24 Pinnacle store managers immediately. Initiate invoice credit with billing team. Add Pinnacle to proactive incident notification list. Manager: review proactive communication process for known bugs."}},{"source_type":"call","source_id":"a1b2c3d4-0013-4abc-8def-000000000013","record_ref":"C13","revision":1,"company":"SkyBridge Consulting","rep_name":"Arjun Mehta","timestamp":"2026-08-21T13:30:00+05:30","duration_seconds":710,"has_transcript":true,"is_silent":false,"auto_route":"Internal / Vendor Strategy","transcript":"Arjun Mehta: Hi Rajan, Arjun from Volopay. Thanks for agreeing to connect on this.\nRajan Iyer: Of course. Your team reached out about a potential reseller partnership?\nArjun Mehta: Yes. We're building out a consulting partner channel. Given SkyBridge's client base in the mid-market SME space, we think there's a strong fit.\nRajan Iyer: Interesting. What does the partnership look like — referral or resell?\nArjun Mehta: Either works for us. Referral is simpler — you introduce clients, we close, you get a commission. Resell is deeper — you manage the client relationship and billing.\nRajan Iyer: Our clients trust us for tech recommendations. Referral makes more sense to start.\nArjun Mehta: That works. Commission is 15% of first-year ACV for each referred client that converts.\nRajan Iyer: That's competitive. We have about 30 clients who could potentially benefit.\nArjun Mehta: Excellent. I'll send over the partner agreement and onboarding docs this week.\nRajan Iyer: Sounds good. Looking forward to reviewing.","ai_summary":{"executive":"Promising reseller/referral partnership discussion with SkyBridge Consulting. Referral model agreed upon. 15% first-year ACV commission discussed. Partner agreement to be sent this week.","evidence":"Rajan Iyer: 'Our clients trust us for tech recommendations. Referral makes more sense to start.' and '15% is competitive. We have about 30 clients who could potentially benefit.'","negative_scope":"No partnership agreement signed. Client referrals from SkyBridge are speculative — no names or timelines given. Commission structure to be formalized in writing.","action_items":"Arjun Mehta to send partner agreement and onboarding docs to Rajan Iyer this week. Flag to partnerships/BD team for pipeline tracking."}},{"source_type":"call","source_id":"a1b2c3d4-0014-4abc-8def-000000000014","record_ref":"C14","revision":1,"company":"Oasis Foods & Beverages","rep_name":"Priya Sharma","timestamp":"2026-08-21T14:00:00+05:30","duration_seconds":589,"has_transcript":true,"is_silent":false,"auto_route":"Deal Next Steps","transcript":"Priya Sharma: Good afternoon Meera, Priya here from Volopay.\nMeera Srinivasan: Hi Priya! Great timing — our procurement head just approved moving ahead with a pilot.\nPriya Sharma: That's fantastic! What's the scope of the pilot?\nMeera Srinivasan: We want to run 30 virtual cards for our vendor payments team for 3 months.\nPriya Sharma: Perfect. 30 cards, 3 months. I'll configure a pilot workspace with spend limits preset for your category — food procurement typically categorizes into raw materials and packaging.\nMeera Srinivasan: Yes, those two categories. Can we have different limits per category?\nPriya Sharma: Absolutely — category-specific limits per card.\nMeera Srinivasan: What do we need to sign for the pilot?\nPriya Sharma: Just a pilot MoU — lighter than a full MSA. I'll send it today.\nMeera Srinivasan: Great. We'd like to go live by September 1st.\nPriya Sharma: That's very achievable. I'll prioritize your setup.\nMeera Srinivasan: Excellent. Thanks Priya!","ai_summary":{"executive":"Pilot approved by Oasis Foods procurement head. 30 virtual cards over 3 months for vendor payments. Target go-live September 1st. Pilot MoU to be sent today.","evidence":"Meera Srinivasan: 'Our procurement head just approved moving ahead with a pilot.' Target date: 'We'd like to go live by September 1st.'","negative_scope":"Pilot MoU not yet signed. Go-live date depends on timely signing and setup. Full commercial agreement follows successful pilot — not yet committed.","action_items":"Priya Sharma to send pilot MoU to Meera Srinivasan today. Prioritize onboarding setup for September 1st go-live target."}},{"source_type":"call","source_id":"a1b2c3d4-0015-4abc-8def-000000000015","record_ref":"C15","revision":1,"company":"Titan Infrastructure Ltd","rep_name":"Rohan Verma","timestamp":"2026-08-21T14:30:00+05:30","duration_seconds":502,"has_transcript":true,"is_silent":false,"auto_route":"Sales Coaching","transcript":"Rohan Verma: Hi Mr. Rathi, this is Rohan from Volopay.\nMr. Rathi: What is this about?\nRohan Verma: We help infrastructure companies manage project-level expenses with virtual cards and real-time reporting.\nMr. Rathi: We have 40+ ongoing projects. How would this work for us?\nRohan Verma: You can issue a card per project with a budget allocation. All spend is tracked in real time against the project budget.\nMr. Rathi: Interesting. Our biggest pain is petty cash management across sites. Can this replace petty cash?\nRohan Verma: Partially — for digital vendor payments yes. For physical cash disbursements, that's out of scope.\nMr. Rathi: Hmm. Most of our site expenses are cash. This might not fit our use case well.\nRohan Verma: Fair point. If you have any digital vendor spend, we're still relevant there. Could be a starting point.\nMr. Rathi: Maybe. Send me some info and I'll think about it.\nRohan Verma: Will do. Thank you for your time, Mr. Rathi.","ai_summary":{"executive":"Exploratory call with Titan Infrastructure — limited product fit identified. Prospect's primary pain is physical cash management across 40+ sites, which is out of Volopay's scope. Weak opportunity.","evidence":"Mr. Rathi: 'Most of our site expenses are cash. This might not fit our use case well.'","negative_scope":"No buying signal. Physical cash disbursement is out of scope — confirmed by Rohan. Prospect's core use case is not met by product.","action_items":"Rohan to send general info. Manager: review qualification framework — Rohan should have identified cash-heavy use case earlier to qualify out sooner."}},{"source_type":"call","source_id":"a1b2c3d4-0016-4abc-8def-000000000016","record_ref":"C16","revision":1,"company":"Lumina EdTech","rep_name":"Sneha Patel","timestamp":"2026-08-21T15:00:00+05:30","duration_seconds":845,"has_transcript":true,"is_silent":false,"auto_route":"Deal Next Steps","transcript":"Sneha Patel: Hi Kavitha, Sneha from Volopay. How has your week been?\nKavitha Menon: Busy! But good. We just closed our Series B — ₹120 crores.\nSneha Patel: Congratulations! That's a great milestone. Post-fundraise, expense management becomes even more critical.\nKavitha Menon: Exactly why I wanted to talk to you. Our investor relations team says we need a proper spend management platform before our next board review.\nSneha Patel: Perfect timing. What's your current team size and spend volume?\nKavitha Menon: 85 employees, roughly ₹40 lakhs a month in vendor spend.\nSneha Patel: At that scale, I'd recommend our Growth plan. It includes unlimited virtual cards, AP automation, and board-ready reports.\nKavitha Menon: Board-ready reports — what does that mean exactly?\nSneha Patel: Automated burn rate dashboards, departmental P&L views, and investor-formatted spend summaries. Your CFO will love it.\nKavitha Menon: Our CFO Arun will definitely want to see this. Can we schedule a demo next week with him?\nSneha Patel: Absolutely. What day works?\nKavitha Menon: Tuesday after 11 AM works for us.\nSneha Patel: I'll send a Tuesday 11:30 AM invite for Arun and you.\nKavitha Menon: Perfect. Looking forward to it!","ai_summary":{"executive":"High-value post-Series B opportunity with Lumina EdTech. 85 employees, ₹40L/month vendor spend. CFO demo booked for next Tuesday.","evidence":"Kavitha Menon: 'Our investor relations team says we need a proper spend management platform before our next board review.'","negative_scope":"No pricing discussed. CFO Arun has not yet seen the product. Deal is early-stage despite strong intent signals.","action_items":"Sneha Patel to send Tuesday 11:30 AM demo invite for Kavitha Menon and CFO Arun at Lumina EdTech."}},{"source_type":"call","source_id":"a1b2c3d4-0017-4abc-8def-000000000017","record_ref":"C17","revision":1,"company":"Helix Biomedical","rep_name":"Vikram Singh","timestamp":"2026-08-21T15:30:00+05:30","duration_seconds":635,"has_transcript":true,"is_silent":false,"auto_route":"Internal / Vendor Strategy","transcript":"Vikram Singh: Hi Sanjay, Vikram from Volopay. Good afternoon.\nSanjay Bose: Hi Vikram. I know why you're calling — you're one of the vendors on our RFP shortlist.\nVikram Singh: That's right. I wanted to understand your evaluation criteria better so we can tailor our response.\nSanjay Bose: Sure. Our top 3 criteria: integration with our existing HRMS, compliance with GMP audit trails for pharma expense reporting, and local INR support.\nVikram Singh: All three are strengths for us. We have a native HRMS integration with DarwinBox and Keka. Our audit trail is immutable and timestamped. And INR is our primary currency.\nSanjay Bose: What about multi-currency for our Singapore subsidiary?\nVikram Singh: Supported — SGD, USD, EUR, GBP. Multi-currency reconciliation is built in.\nSanjay Bose: Good. RFP responses are due September 5th.\nVikram Singh: We'll have a comprehensive response in by September 3rd. Would you prefer a written walkthrough or a live demo alongside the RFP?\nSanjay Bose: Both would be ideal.\nVikram Singh: We'll arrange both. Thank you, Sanjay.","ai_summary":{"executive":"RFP discovery call with Helix Biomedical. Top evaluation criteria identified: HRMS integration, GMP audit trail, INR support. RFP response due September 5th — Volopay to respond by September 3rd with written + demo.","evidence":"Sanjay Bose: 'Our top 3 criteria: integration with existing HRMS, GMP audit trails, and local INR support.' RFP deadline: September 5th.","negative_scope":"Volopay is one of multiple vendors on the shortlist — selection not confirmed. Response quality will determine shortlisting for next round.","action_items":"Vikram Singh to prepare comprehensive RFP response for Helix Biomedical by September 3rd. Coordinate with solutions team for live demo scheduling. Flag for strategic tracking."}},{"source_type":"call","source_id":"a1b2c3d4-0018-4abc-8def-000000000018","record_ref":"C18","revision":1,"company":"Brightfield Exports","rep_name":"Arjun Mehta","timestamp":"2026-08-21T08:30:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"call","source_id":"a1b2c3d4-0019-4abc-8def-000000000019","record_ref":"C19","revision":1,"company":"Marble Stone Industries","rep_name":"Priya Sharma","timestamp":"2026-08-21T08:45:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"call","source_id":"a1b2c3d4-0020-4abc-8def-000000000020","record_ref":"C20","revision":1,"company":"Coastline Trading","rep_name":"Rohan Verma","timestamp":"2026-08-21T09:15:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"call","source_id":"a1b2c3d4-0021-4abc-8def-000000000021","record_ref":"C21","revision":1,"company":"Evergreen Textiles","rep_name":"Sneha Patel","timestamp":"2026-08-21T09:30:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"call","source_id":"a1b2c3d4-0022-4abc-8def-000000000022","record_ref":"C22","revision":1,"company":"Goldleaf Investments","rep_name":"Vikram Singh","timestamp":"2026-08-21T10:00:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"call","source_id":"a1b2c3d4-0023-4abc-8def-000000000023","record_ref":"C23","revision":1,"company":"Riverstone Construction","rep_name":"Kavya Nair","timestamp":"2026-08-21T10:15:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"call","source_id":"a1b2c3d4-0024-4abc-8def-000000000024","record_ref":"C24","revision":1,"company":"Horizon Auto Parts","rep_name":"Arjun Mehta","timestamp":"2026-08-21T11:00:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"call","source_id":"a1b2c3d4-0025-4abc-8def-000000000025","record_ref":"C25","revision":1,"company":"Sapphire Events","rep_name":"Priya Sharma","timestamp":"2026-08-21T11:20:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"call","source_id":"a1b2c3d4-0026-4abc-8def-000000000026","record_ref":"C26","revision":1,"company":"Netlink ISP Services","rep_name":"Rohan Verma","timestamp":"2026-08-21T11:45:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"call","source_id":"a1b2c3d4-0027-4abc-8def-000000000027","record_ref":"C27","revision":1,"company":"Pioneer Chemicals","rep_name":"Sneha Patel","timestamp":"2026-08-21T12:10:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"call","source_id":"a1b2c3d4-0028-4abc-8def-000000000028","record_ref":"C28","revision":1,"company":"Coral Bay Exports","rep_name":"Vikram Singh","timestamp":"2026-08-21T12:30:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"call","source_id":"a1b2c3d4-0029-4abc-8def-000000000029","record_ref":"C29","revision":1,"company":"Sunridge Solar","rep_name":"Kavya Nair","timestamp":"2026-08-21T13:00:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"call","source_id":"a1b2c3d4-0030-4abc-8def-000000000030","record_ref":"C30","revision":1,"company":"Indus Valley Packers","rep_name":"Arjun Mehta","timestamp":"2026-08-21T13:45:00+05:30","duration_seconds":0,"has_transcript":false,"is_silent":true,"auto_route":"Unprocessed / Low Signal","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"4f304fff-fd40-5cfc-a366-0a134c445c2a","record_ref":"M07","revision":1,"title":"UI Payment Bug Triage & Resolution Meeting","organizer_email":"priya.sharma@volopay.com","timestamp":"2026-08-21T10:00:00+05:30","duration_seconds":3600,"has_transcript":false,"is_silent":false,"auto_route":"Customer Escalation / Bug","transcript":null,"ai_summary":{"executive":"Critical triage meeting for multiple UI payment bugs reported by enterprise clients. Awaiting transcript for full details.","evidence":"Transcript not yet available. Meeting duration 60 minutes — severity indicates critical-level discussion.","negative_scope":"Cannot confirm specific bugs, owners, or resolution timelines without transcript.","action_items":"Pending transcript review. Expedite transcript processing for this meeting."}},{"source_type":"meeting","source_id":"b2c3d4e5-0001-4bcd-9ef0-000000000101","record_ref":"M01","revision":1,"title":"Weekly Sales Pipeline Review","organizer_email":"arjun.mehta@volopay.com","timestamp":"2026-08-21T09:00:00+05:30","duration_seconds":2700,"has_transcript":false,"is_silent":false,"auto_route":"Deal Next Steps","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"b2c3d4e5-0002-4bcd-9ef0-000000000102","record_ref":"M02","revision":1,"title":"Vendor Partnership Evaluation — BankLink API","organizer_email":"vikram.singh@volopay.com","timestamp":"2026-08-21T11:00:00+05:30","duration_seconds":3600,"has_transcript":false,"is_silent":false,"auto_route":"Internal / Vendor Strategy","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"b2c3d4e5-0003-4bcd-9ef0-000000000103","record_ref":"M03","revision":1,"title":"Onboarding Review: Starfield Logistics (Prepaid vs Credit)","organizer_email":"sneha.patel@volopay.com","timestamp":"2026-08-21T12:00:00+05:30","duration_seconds":2400,"has_transcript":false,"is_silent":false,"auto_route":"Customer Escalation / Bug","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"b2c3d4e5-0004-4bcd-9ef0-000000000104","record_ref":"M04","revision":1,"title":"Cascade Fintech Credit Eligibility Deep Dive","organizer_email":"vikram.singh@volopay.com","timestamp":"2026-08-21T14:00:00+05:30","duration_seconds":2700,"has_transcript":false,"is_silent":false,"auto_route":"Deal Next Steps","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"b2c3d4e5-0005-4bcd-9ef0-000000000105","record_ref":"M05","revision":1,"title":"Q3 Forecast & Team Targets Alignment","organizer_email":"rohan.verma@volopay.com","timestamp":"2026-08-21T15:00:00+05:30","duration_seconds":3600,"has_transcript":false,"is_silent":false,"auto_route":"Internal / Vendor Strategy","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"b2c3d4e5-0006-4bcd-9ef0-000000000106","record_ref":"M06","revision":1,"title":"Lumina EdTech CFO Demo Prep","organizer_email":"sneha.patel@volopay.com","timestamp":"2026-08-21T16:00:00+05:30","duration_seconds":1800,"has_transcript":false,"is_silent":false,"auto_route":"Deal Next Steps","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"b2c3d4e5-0008-4bcd-9ef0-000000000108","record_ref":"M08","revision":1,"title":"Android 14 Bug Retrospective","organizer_email":"kavya.nair@volopay.com","timestamp":"2026-08-21T11:30:00+05:30","duration_seconds":2700,"has_transcript":false,"is_silent":false,"auto_route":"Customer Escalation / Bug","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"b2c3d4e5-0009-4bcd-9ef0-000000000109","record_ref":"M09","revision":1,"title":"Helix Biomedical RFP Strategy Session","organizer_email":"vikram.singh@volopay.com","timestamp":"2026-08-21T13:00:00+05:30","duration_seconds":2400,"has_transcript":false,"is_silent":false,"auto_route":"Deal Next Steps","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"b2c3d4e5-0010-4bcd-9ef0-000000000110","record_ref":"M10","revision":1,"title":"SkyBridge Consulting Partner Program Kickoff","organizer_email":"arjun.mehta@volopay.com","timestamp":"2026-08-21T14:30:00+05:30","duration_seconds":3000,"has_transcript":false,"is_silent":false,"auto_route":"Internal / Vendor Strategy","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"b2c3d4e5-0011-4bcd-9ef0-000000000111","record_ref":"M11","revision":1,"title":"Meridian Pharma Legal Review Prep","organizer_email":"rohan.verma@volopay.com","timestamp":"2026-08-21T15:30:00+05:30","duration_seconds":2400,"has_transcript":false,"is_silent":false,"auto_route":"Deal Next Steps","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"b2c3d4e5-0012-4bcd-9ef0-000000000112","record_ref":"M12","revision":1,"title":"Product Feedback: Receipt Upload UX Issues","organizer_email":"kavya.nair@volopay.com","timestamp":"2026-08-21T16:30:00+05:30","duration_seconds":2700,"has_transcript":false,"is_silent":false,"auto_route":"Customer Escalation / Bug","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"b2c3d4e5-0013-4bcd-9ef0-000000000113","record_ref":"M13","revision":1,"title":"Oasis Foods Pilot Launch Readiness","organizer_email":"priya.sharma@volopay.com","timestamp":"2026-08-21T17:00:00+05:30","duration_seconds":2700,"has_transcript":false,"is_silent":false,"auto_route":"Deal Next Steps","transcript":null,"ai_summary":null},{"source_type":"meeting","source_id":"b2c3d4e5-0014-4bcd-9ef0-000000000114","record_ref":"M14","revision":1,"title":"Cold Call Coaching Session — Junior SDRs","organizer_email":"arjun.mehta@volopay.com","timestamp":"2026-08-21T17:30:00+05:30","duration_seconds":3600,"has_transcript":false,"is_silent":false,"auto_route":"Sales Coaching","transcript":null,"ai_summary":null}]};
+
+const BATCH_02 = {"batch_id":"02_update","batch_date":"2026-08-21","timezone":"Asia/Kolkata","records":[{"source_type":"meeting","source_id":"4f304fff-fd40-5cfc-a366-0a134c445c2a","record_ref":"M07","revision":2,"title":"UI Payment Bug Triage & Resolution Meeting","organizer_email":"priya.sharma@volopay.com","timestamp":"2026-08-21T10:00:00+05:30","duration_seconds":3600,"has_transcript":true,"is_silent":false,"auto_route":"Customer Escalation / Bug","transcript":[{"speaker":"Priya Sharma","time":"00:00:15","text":"Alright everyone, let's get started. We have 4 critical payment UI bugs to triage today. I've invited Deepak from Quantum Energy as a reference client, and Kiran from engineering. Let's go through each one."},{"speaker":"Kiran Raj (Eng)","time":"00:01:05","text":"Thanks Priya. Bug 1 — the payment confirmation modal is dismissing before the server acknowledgment is received. We're seeing a race condition on slow 4G connections. Affects about 12% of mobile transactions over 4G."},{"speaker":"Deepak Nair (Quantum)","time":"00:01:58","text":"This is exactly what we experienced. The transaction appeared successful in the app but was declined on the backend. Our vendor had to call us asking where the payment was."},{"speaker":"Priya Sharma","time":"00:02:30","text":"Kiran, what's the fix timeline for Bug 1?"},{"speaker":"Kiran Raj (Eng)","time":"00:02:45","text":"We've already pushed a fix to staging. It awaits QA sign-off. Production deployment expected by today EOD."},{"speaker":"Priya Sharma","time":"00:03:10","text":"Good. Bug 2 — the payment amount field is accepting amounts above the card limit without showing a real-time validation error, only failing at submission. That's a UX gap."},{"speaker":"Kiran Raj (Eng)","time":"00:03:45","text":"Correct. We need to add client-side limit validation that mirrors the server validation. Estimated 2 days of frontend work."},{"speaker":"Deepak Nair (Quantum)","time":"00:04:20","text":"Our users were confused — they filled out the entire form, hit submit, and got a cryptic error. They restarted the payment 3 times thinking it was a connection issue."},{"speaker":"Priya Sharma","time":"00:04:55","text":"The UX error messaging needs a complete rewrite alongside the validation fix. Kiran, can we ensure the error message is plain English, no error codes?"},{"speaker":"Kiran Raj (Eng)","time":"00:05:10","text":"Agreed. We'll update the error copy as part of the same PR."},{"speaker":"Priya Sharma","time":"00:05:30","text":"Bug 3 — the bulk payment CSV upload is silently dropping rows when the file has Windows-style CRLF line endings instead of Unix LF. This is a file parsing issue."},{"speaker":"Kiran Raj (Eng)","time":"00:06:00","text":"Yes. Our CSV parser wasn't normalizing line endings. Fix is a 1-line code change — already in main branch. Will be in the next release."},{"speaker":"Priya Sharma","time":"00:06:30","text":"Good. Bug 4 — the payment confirmation email is including the full card PAN in plaintext. This is a PCI-DSS violation and is the most critical issue today."},{"speaker":"Kiran Raj (Eng)","time":"00:07:10","text":"Confirmed. This was introduced in the v2.8.3 release last week when we updated the email template. The fix — masking to last 4 digits — is ready. We need immediate hotfix deployment. I'm recommending we do it within the next 2 hours."},{"speaker":"Deepak Nair (Quantum)","time":"00:07:55","text":"We received several of those emails. Our IT team flagged it as a security concern yesterday. I'm glad you're treating it as P0."},{"speaker":"Priya Sharma","time":"00:08:20","text":"Kiran, please initiate the hotfix deployment immediately after this call. We also need to send a security advisory email to all affected clients — anyone who received a payment confirmation email since v2.8.3 was deployed."},{"speaker":"Kiran Raj (Eng)","time":"00:08:50","text":"Understood. I'll coordinate with InfoSec for the advisory draft. We should also notify RBI as required under the Digital Payments framework."},{"speaker":"Priya Sharma","time":"00:09:15","text":"Yes — loop in our Compliance team for the RBI notification. Alright, let's close — Bug 4 is P0/immediate, Bug 1 is EOD, Bugs 2 and 3 are within 48 hours. Any questions?"},{"speaker":"Deepak Nair (Quantum)","time":"00:09:40","text":"Will we get written confirmation of the timeline and the security advisory?"},{"speaker":"Priya Sharma","time":"00:09:55","text":"Yes Deepak, I'll send a written summary to all affected clients within 1 hour of this meeting ending. Thank you all."}],"ai_summary":{"executive":"Critical triage meeting resolved 4 UI payment bugs. Bug 4 (PAN exposed in plaintext emails — PCI-DSS violation, introduced in v2.8.3) classified P0 and requires immediate hotfix and client security advisory. Bugs 1, 2, 3 have 2–48 hour resolution windows.","evidence":"Kiran Raj (Turn 13): 'This was introduced in the v2.8.3 release... The fix — masking to last 4 digits — is ready. I'm recommending we do it within the next 2 hours.' Deepak Nair (Turn 14): 'Our IT team flagged it as a security concern yesterday.'","negative_scope":"Hotfix not yet deployed at time of meeting end — deployment was to begin immediately after. RBI notification not yet filed — Compliance team to be looped in. Number of affected clients receiving PAN-exposed emails is not quantified in this transcript.","action_items":"1. Kiran Raj: Deploy PAN masking hotfix within 2 hours (P0). 2. InfoSec + Compliance: Draft and send security advisory to all clients who received confirmation emails since v2.8.3. 3. Compliance: File RBI notification per Digital Payments framework. 4. Priya Sharma: Send written bug timeline summary to affected clients within 1 hour. 5. Engineering: Deploy Bug 1 fix by EOD, Bugs 2 & 3 within 48 hours."}}]};
+
+/* ============================================================
+   CONSTANTS
+   ============================================================ */
+const STORAGE_KEY = 'rii_state_v2';
+const ROUTES = ['Deal Next Steps','Sales Coaching','Customer Escalation / Bug','Internal / Vendor Strategy','Unprocessed / Low Signal'];
+const ROUTE_CONFIG = {
+  'Deal Next Steps':           { color: '#22c55e',  bg: 'rgba(34,197,94,0.12)',   icon: '🎯', folder: 'deals/' },
+  'Sales Coaching':            { color: '#f59e0b',  bg: 'rgba(245,158,11,0.12)', icon: '🏆', folder: 'coaching/' },
+  'Customer Escalation / Bug': { color: '#ef4444',  bg: 'rgba(239,68,68,0.12)',  icon: '🚨', folder: 'support/' },
+  'Internal / Vendor Strategy':{ color: '#a855f7',  bg: 'rgba(168,85,247,0.12)', icon: '🤝', folder: 'vendor/' },
+  'Unprocessed / Low Signal':  { color: '#5a6178',  bg: 'rgba(90,97,120,0.12)',  icon: '⏸', folder: 'unprocessed/' },
+};
+
+const compositeKey = (r) => `${r.source_type}::${r.source_id}`;
+
+const fmtDuration = (s) => {
+  if (!s) return '—';
+  const m = Math.floor(s/60), sec = s%60;
+  return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+};
+
+const fmtTime = (iso) => {
+  try {
+    return new Date(iso).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'Asia/Kolkata'});
+  } catch { return iso; }
+};
+
+/* ============================================================
+   STATE MANAGEMENT (localStorage)
+   ============================================================ */
+const loadState = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { records: {}, overrides: {}, loadedBatches: [], selectedKey: null, activeTab: 'inbox', filters: { sourceType: 'all', person: 'all' } };
+};
+
+const saveState = (state) => {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+};
+
+/* ============================================================
+   REPLAY ENGINE
+   ============================================================ */
+const applyBatch = (currentRecords, batch) => {
+  const updated = { ...currentRecords };
+  let added = 0, skipped = 0, upgraded = 0;
+  for (const rec of batch.records) {
+    const key = compositeKey(rec);
+    if (!updated[key]) {
+      updated[key] = { ...rec, _batchId: batch.batch_id };
+      added++;
+    } else if (rec.revision > updated[key].revision) {
+      updated[key] = { ...rec, _batchId: batch.batch_id };
+      upgraded++;
+    } else {
+      skipped++;
+    }
+  }
+  return { records: updated, stats: { added, skipped, upgraded } };
+};
+
+/* ============================================================
+   TAG COMPONENT
+   ============================================================ */
+const Tag = ({ children, color, bg, size = 'sm' }) => (
+  <span className="tag" style={{ color, backgroundColor: bg, fontSize: size === 'xs' ? 10 : 11 }}>
+    {children}
+  </span>
+);
+
+const RouteTag = ({ route, size }) => {
+  const cfg = ROUTE_CONFIG[route] || ROUTE_CONFIG['Unprocessed / Low Signal'];
+  return <Tag color={cfg.color} bg={cfg.bg} size={size}>{cfg.icon} {route}</Tag>;
+};
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+const TopBar = ({ activeTab, setActiveTab }) => {
+  const tabs = [
+    { id: 'inbox', label: '📥 Inbox', },
+    { id: 'brief', label: '📋 Daily Brief' },
+  ];
+  return (
+    <div style={{ background: 'linear-gradient(135deg, #0d1021 0%, #111624 100%)', borderBottom: '1px solid var(--border)', padding: '0 20px', display: 'flex', alignItems: 'center', gap: 24, height: 56, flexShrink: 0, zIndex: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginRight: 8 }}>
+        <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #4f7cff, #a855f7)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, boxShadow: '0 0 16px rgba(79,124,255,0.4)' }}>⚡</div>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.3px', color: 'var(--text-primary)' }}>Revenue Intelligence</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.5px', fontWeight: 500 }}>VOLOPAY INBOX</div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 4, flex: 1 }}>
+        {tabs.map(t => (
+          <button key={t.id} id={`tab-${t.id}`} onClick={() => setActiveTab(t.id)}
+            style={{ padding: '6px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
+              background: activeTab === t.id ? 'var(--accent-soft)' : 'transparent',
+              color: activeTab === t.id ? 'var(--accent)' : 'var(--text-muted)',
+              borderBottom: activeTab === t.id ? '2px solid var(--accent)' : '2px solid transparent'
+            }}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 12px', background: 'var(--bg-elevated)', borderRadius: 8, border: '1px solid var(--border)' }}>
+        <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>📅</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--amber)', letterSpacing: '0.3px' }}>21 Aug 2026</span>
+        <span style={{ width: 1, height: 12, background: 'var(--border)' }}></span>
+        <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Asia/Kolkata</span>
+      </div>
+    </div>
+  );
+};
+
+/* ============================================================
+   METRICS BAR
+   ============================================================ */
+const MetricsBar = ({ records, overrides, filters, setFilters, notify }) => {
+  const all = Object.values(records);
+  const total = all.length;
+  const withTranscript = all.filter(r => r.has_transcript).length;
+  const pct = total ? ((withTranscript/total)*100).toFixed(1) : 0;
+  const needsReview = all.filter(r => !r.is_silent && r.has_transcript && !overrides[compositeKey(r)]?.reviewed).length;
+
+  const persons = useMemo(() => {
+    const s = new Set();
+    all.forEach(r => { if(r.source_type==='call') s.add(r.rep_name); else s.add(r.organizer_email); });
+    return Array.from(s).sort();
+  }, [all.length]);
+
+  const metrics = [
+    { label: 'Total Records', value: total, accent: '#4f7cff', icon: '🗂' },
+    { label: 'Transcript Coverage', value: `${withTranscript}/${total}`, sub: `${pct}%`, accent: '#22c55e', icon: '🎙' },
+    { label: 'Has Transcript', value: withTranscript, accent: '#06b6d4', icon: '📝' },
+    { label: 'Needs Review', value: needsReview, accent: '#f59e0b', icon: '🔍' },
+  ];
+
+  return (
+    <div style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0, flexWrap: 'wrap' }}>
+      {metrics.map(m => (
+        <div key={m.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', background: 'var(--bg-elevated)', borderRadius: 10, border: '1px solid var(--border)', minWidth: 130 }}>
+          <span style={{ fontSize: 18 }}>{m.icon}</span>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: m.accent, lineHeight: 1 }}>{m.value} {m.sub && <span style={{ fontSize: 12, opacity: 0.7 }}>({m.sub})</span>}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>{m.label}</div>
+          </div>
+        </div>
+      ))}
+      <div style={{ flex: 1 }}></div>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>Filter:</span>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {['all','call','meeting'].map(t => (
+            <button key={t} id={`filter-type-${t}`} onClick={() => setFilters(f => ({...f, sourceType: t}))}
+              style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid', cursor: 'pointer', fontSize: 11, fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.15s',
+                background: filters.sourceType===t ? 'var(--accent-soft)' : 'var(--bg-elevated)',
+                color: filters.sourceType===t ? 'var(--accent)' : 'var(--text-muted)',
+                borderColor: filters.sourceType===t ? 'var(--accent)' : 'var(--border-light)'
+              }}>
+              {t==='all'?'All':t==='call'?'📞 Calls':'📅 Meetings'}
+            </button>
+          ))}
+        </div>
+        <select id="filter-person" value={filters.person} onChange={e => setFilters(f => ({...f, person: e.target.value}))} style={{ padding: '5px 8px', fontSize: 11 }}>
+          <option value="all">All People</option>
+          {persons.map(p => <option key={p} value={p}>{p}</option>)}
+        </select>
+      </div>
+    </div>
+  );
+};
+
+/* ============================================================
+   REPLAY CONTROL PANEL
+   ============================================================ */
+const ReplayPanel = ({ loadedBatches, onLoad, onReset, notify }) => {
+  const [log, setLog] = useState([]);
+  const addLog = (msg, type='info') => setLog(prev => [{msg, type, ts: new Date().toLocaleTimeString()}, ...prev].slice(0,8));
+
+  const handleLoad = (batchId, batch, label) => {
+    const result = onLoad(batchId, batch);
+    if (result.alreadyLoaded) {
+      addLog(`⚠️ ${label} was already loaded — running deduplication check...`, 'warn');
+      setTimeout(() => addLog(`✅ Dedup check complete: ${result.stats.skipped} records skipped (no inflation), ${result.stats.upgraded} upgraded. Total: ${result.totalCount}`, 'success'), 600);
+    } else {
+      addLog(`✅ ${label} loaded: +${result.stats.added} new, ${result.stats.upgraded} upgraded, ${result.stats.skipped} skipped. Total: ${result.totalCount}`, 'success');
+    }
+    notify && notify(`${label} applied`, 'success');
+  };
+
+  return (
+    <div style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)', padding: '10px 20px', display: 'flex', gap: 10, alignItems: 'flex-start', flexShrink: 0, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.5px' }}>⚙ REPLAY:</span>
+        <button id="btn-load-initial" className="btn btn-secondary" onClick={() => handleLoad('01_initial', BATCH_01, 'Initial Batch (01)')}>
+          📦 Load Initial Batch (01)
+        </button>
+        <button id="btn-reimport-initial" className="btn btn-amber" onClick={() => handleLoad('01_initial', BATCH_01, 'Re-import Initial')}>
+          🔄 Re-import Initial (Dedup)
+        </button>
+        <button id="btn-apply-update" className="btn btn-success" onClick={() => handleLoad('02_update', BATCH_02, 'Update Batch (02)')}>
+          ⬆ Apply Update (02)
+        </button>
+        <button id="btn-reset" className="btn btn-danger" onClick={() => { onReset(); setLog([]); addLog('🗑 State cleared — clean slate.', 'warn'); }}>
+          🗑 Reset State
+        </button>
+      </div>
+      {log.length > 0 && (
+        <div style={{ flex: 1, minWidth: 300 }}>
+          {log.slice(0,3).map((l,i) => (
+            <div key={i} className="mono" style={{ fontSize: 10.5, padding: '2px 8px', borderRadius: 4, marginBottom: 2,
+              color: l.type==='success'?'var(--green)':l.type==='warn'?'var(--amber)':'var(--text-secondary)',
+              background: l.type==='success'?'var(--green-soft)':l.type==='warn'?'var(--amber-soft)':'var(--bg-elevated)' }}>
+              [{l.ts}] {l.msg}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ============================================================
+   INBOX CARD
+   ============================================================ */
+const InboxCard = ({ record, override, isSelected, onClick }) => {
+  const key = compositeKey(record);
+  const route = override?.route || record.auto_route;
+  const cfg = ROUTE_CONFIG[route] || ROUTE_CONFIG['Unprocessed / Low Signal'];
+  const person = record.source_type === 'call' ? record.rep_name : record.organizer_email;
+
+  return (
+    <div id={`card-${record.record_ref}`} onClick={onClick}
+      style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.15s',
+        background: isSelected ? 'var(--bg-active)' : 'transparent',
+        borderLeft: isSelected ? `3px solid ${cfg.color}` : '3px solid transparent',
+      }}
+      onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-hover)'; }}
+      onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span className="mono" style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', background: 'var(--bg-elevated)', padding: '1px 6px', borderRadius: 4 }}>{record.record_ref}</span>
+          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{record.source_type === 'call' ? '📞' : '📅'}</span>
+          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Rev {record.revision}</span>
+        </div>
+        <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{fmtTime(record.timestamp)}</span>
+      </div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 3, lineHeight: 1.3 }}>
+        {record.source_type === 'call' ? record.company : record.title}
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 8 }}>{person}</div>
+      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+        <span style={{ padding: '1px 7px', borderRadius: 4, fontSize: 10, fontWeight: 600, color: cfg.color, background: cfg.bg }}>
+          {cfg.icon} {route.length > 22 ? route.slice(0,22)+'…' : route}
+        </span>
+        {record.has_transcript && <Tag color="#06b6d4" bg="var(--cyan-soft)" size="xs">🎙 Transcript</Tag>}
+        {record.is_silent && <Tag color="var(--text-muted)" bg="var(--bg-elevated)" size="xs">🔇 Silent</Tag>}
+        {override?.manual_override && <Tag color="#a855f7" bg="var(--purple-soft)" size="xs">✏ Override</Tag>}
+      </div>
+    </div>
+  );
+};
+
+/* ============================================================
+   TRANSCRIPT VIEWER
+   ============================================================ */
+const TranscriptViewer = ({ record }) => {
+  if (!record.has_transcript || !record.transcript) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, color: 'var(--text-muted)' }}>
+        <span style={{ fontSize: 40 }}>{record.is_silent ? '🔇' : '⏳'}</span>
+        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)' }}>
+          {record.is_silent ? 'Silent / No Audio Recorded' : 'Transcript Not Yet Available'}
+        </div>
+        <div style={{ fontSize: 12 }}>{record.is_silent ? 'Call connected but no audio was captured.' : 'Processing in progress. Apply update batch to receive transcript.'}</div>
+      </div>
+    );
+  }
+
+  if (Array.isArray(record.transcript)) {
+    // Meeting: turn-by-turn
+    const speakerColors = {};
+    const palette = ['#4f7cff','#22c55e','#f59e0b','#a855f7','#06b6d4','#f97316'];
+    let ci = 0;
+    const getColor = (sp) => { if (!speakerColors[sp]) { speakerColors[sp] = palette[ci++ % palette.length]; } return speakerColors[sp]; };
+    return (
+      <div style={{ overflowY: 'auto', height: '100%', padding: '4px 4px 4px 0' }}>
+        {record.transcript.map((turn, i) => {
+          const color = getColor(turn.speaker);
+          return (
+            <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 16, animation: 'fadeIn 0.2s ease' }}>
+              <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: color+'22', border: `2px solid ${color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color }}>
+                  {turn.speaker.split(' ').map(w=>w[0]).join('').slice(0,2)}
+                </div>
+                <span className="mono" style={{ fontSize: 9, color: 'var(--text-muted)' }}>{turn.time}</span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color, marginBottom: 4 }}>{turn.speaker}</div>
+                <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.6, background: 'var(--bg-elevated)', padding: '8px 12px', borderRadius: '0 10px 10px 10px', border: '1px solid var(--border)' }}>
+                  {turn.text}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Call: plain text
+  const lines = record.transcript.split('\n').filter(l => l.trim());
+  return (
+    <div style={{ overflowY: 'auto', height: '100%', padding: '4px' }}>
+      {lines.map((line, i) => {
+        const colonIdx = line.indexOf(':');
+        const speaker = colonIdx > -1 ? line.slice(0, colonIdx) : null;
+        const text = colonIdx > -1 ? line.slice(colonIdx + 1).trim() : line;
+        const isRep = speaker && !speaker.includes('Prospect') && !speaker.includes('Receptionist') && !speaker.includes('Mr.') && !speaker.includes('Mrs.') && !speaker.includes('Dr.');
+        return (
+          <div key={i} style={{ marginBottom: 12, display: 'flex', gap: 10, flexDirection: isRep ? 'row' : 'row-reverse' }}>
+            {speaker && (
+              <div style={{ flexShrink: 0, fontSize: 11, fontWeight: 700, color: isRep ? 'var(--accent)' : 'var(--text-muted)', minWidth: 100, textAlign: isRep ? 'left' : 'right', paddingTop: 2 }}>
+                {speaker}
+              </div>
+            )}
+            <div style={{ flex: 1, fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.6, background: isRep ? 'var(--accent-soft)' : 'var(--bg-elevated)', padding: '8px 12px', borderRadius: isRep ? '10px 10px 10px 2px' : '10px 10px 2px 10px', border: `1px solid ${isRep ? 'var(--accent)' : 'var(--border)'}`, borderColor: isRep ? 'rgba(79,124,255,0.3)' : 'var(--border)', maxWidth: '80%' }}>
+              {text}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+/* ============================================================
+   AI ANALYSIS PANEL
+   ============================================================ */
+const AIPanel = ({ record }) => {
+  const summary = record.ai_summary;
+  if (!summary) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, color: 'var(--text-muted)' }}>
+        <span style={{ fontSize: 40 }}>🤖</span>
+        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)' }}>No AI Analysis Available</div>
+        <div style={{ fontSize: 12, textAlign: 'center', maxWidth: 300 }}>AI analysis requires a transcript. This record has no processable audio or transcript.</div>
+      </div>
+    );
+  }
+
+  const cards = [
+    { icon: '📋', label: 'Executive Summary', content: summary.executive, color: '#4f7cff', bg: 'rgba(79,124,255,0.06)' },
+    { icon: '💬', label: 'Verifiable Evidence', content: summary.evidence, color: '#22c55e', bg: 'rgba(34,197,94,0.06)', mono: true },
+    { icon: '⚠️', label: 'Negative Scope', content: summary.negative_scope, color: '#f59e0b', bg: 'rgba(245,158,11,0.06)' },
+    { icon: '✅', label: 'Action Items & Owner', content: summary.action_items, color: '#a855f7', bg: 'rgba(168,85,247,0.06)' },
+  ];
+
+  return (
+    <div style={{ overflowY: 'auto', height: '100%', display: 'flex', flexDirection: 'column', gap: 12, padding: '4px' }}>
+      {cards.map(card => (
+        <div key={card.label} style={{ background: card.bg, border: `1px solid ${card.color}33`, borderRadius: 12, padding: '14px 16px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <span>{card.icon}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: card.color, letterSpacing: '0.5px', textTransform: 'uppercase' }}>{card.label}</span>
+          </div>
+          <div style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--text-primary)', fontFamily: card.mono ? "'JetBrains Mono', monospace" : 'inherit', fontStyle: card.mono ? 'italic' : 'normal' }}>
+            {card.content}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/* ============================================================
+   ROUTE PANEL
+   ============================================================ */
+const RoutePanel = ({ record, override, onSaveRoute }) => {
+  const key = compositeKey(record);
+  const currentRoute = override?.route || record.auto_route;
+  const [selectedRoute, setSelectedRoute] = useState(currentRoute);
+  const [notes, setNotes] = useState(override?.notes || '');
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setSelectedRoute(override?.route || record.auto_route);
+    setNotes(override?.notes || '');
+  }, [key]);
+
+  const handleSave = () => {
+    onSaveRoute(key, selectedRoute, notes);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  return (
+    <div style={{ overflowY: 'auto', height: '100%', display: 'flex', flexDirection: 'column', gap: 16, padding: '4px' }}>
+      <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 10, letterSpacing: '0.5px' }}>CURRENT ASSIGNMENT</div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <RouteTag route={currentRoute} />
+          {override?.manual_override
+            ? <Tag color="#a855f7" bg="var(--purple-soft)">✏ Manually Overridden</Tag>
+            : <Tag color="var(--text-muted)" bg="var(--bg-hover)">🤖 AI Auto-routed</Tag>}
+        </div>
+        {override?.updated_at && (
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>Last updated: {new Date(override.updated_at).toLocaleString()}</div>
+        )}
+      </div>
+
+      <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 12, letterSpacing: '0.5px' }}>REASSIGN ROUTE</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {ROUTES.map(route => {
+            const cfg = ROUTE_CONFIG[route];
+            const isSelected = selectedRoute === route;
+            return (
+              <div key={route} onClick={() => setSelectedRoute(route)}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 8, cursor: 'pointer', border: `1px solid ${isSelected ? cfg.color : 'var(--border)'}`, background: isSelected ? cfg.bg : 'var(--bg-surface)', transition: 'all 0.15s' }}>
+                <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${cfg.color}`, background: isSelected ? cfg.color : 'transparent', transition: 'all 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {isSelected && <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff' }}></div>}
+                </div>
+                <span style={{ fontSize: 13, fontWeight: isSelected ? 600 : 400, color: isSelected ? cfg.color : 'var(--text-secondary)' }}>{cfg.icon} {route}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 10, letterSpacing: '0.5px' }}>MANAGER NOTES</div>
+        <textarea id={`notes-${record.record_ref}`} value={notes} onChange={e => setNotes(e.target.value)}
+          placeholder="Add context, reasoning, or follow-up notes..."
+          style={{ width: '100%', minHeight: 100, padding: '10px 12px', resize: 'vertical', borderRadius: 8, fontSize: 13, lineHeight: 1.6 }} />
+      </div>
+
+      <button id={`save-route-${record.record_ref}`} className="btn btn-primary" onClick={handleSave} style={{ width: '100%', justifyContent: 'center', padding: 12, fontSize: 14 }}>
+        {saved ? '✅ Saved!' : '💾 Save Manual Route Override'}
+      </button>
+    </div>
+  );
+};
+
+/* ============================================================
+   CONVERSATION WORKSPACE
+   ============================================================ */
+const ConversationWorkspace = ({ record, override, onSaveRoute }) => {
+  const [tab, setTab] = useState('transcript');
+
+  useEffect(() => { setTab('transcript'); }, [record?.source_id]);
+
+  if (!record) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 16, color: 'var(--text-muted)' }}>
+        <div style={{ fontSize: 64, filter: 'grayscale(0.5)' }}>📭</div>
+        <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-secondary)' }}>Select a record to begin</div>
+        <div style={{ fontSize: 13 }}>Choose any record from the inbox to view its transcript, AI analysis, and routing options.</div>
+      </div>
+    );
+  }
+
+  const route = override?.route || record.auto_route;
+  const cfg = ROUTE_CONFIG[route];
+  const person = record.source_type === 'call' ? record.rep_name : record.organizer_email;
+
+  const tabs = [
+    { id: 'transcript', label: '📄 Transcript' },
+    { id: 'analysis', label: '🤖 AI Analysis' },
+    { id: 'route', label: '🎯 Routing' },
+  ];
+
+  return (
+    <div className="slide-right" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      {/* Header */}
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', background: 'var(--bg-surface)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <span className="mono" style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: 4 }}>{record.record_ref}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Rev {record.revision}</span>
+              {record.has_transcript && <Tag color="#06b6d4" bg="var(--cyan-soft)" size="xs">🎙 Transcript</Tag>}
+              {record.is_silent && <Tag color="var(--text-muted)" bg="var(--bg-elevated)" size="xs">🔇 Silent</Tag>}
+              {override?.manual_override && <Tag color="#a855f7" bg="var(--purple-soft)" size="xs">✏ Override</Tag>}
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+              {record.source_type === 'call' ? record.company : record.title}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+              {record.source_type === 'call' ? '📞' : '📅'} {person} &nbsp;·&nbsp; {fmtTime(record.timestamp)} &nbsp;·&nbsp; {fmtDuration(record.duration_seconds)}
+            </div>
+          </div>
+          <RouteTag route={route} />
+        </div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {tabs.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              style={{ padding: '5px 14px', borderRadius: 6, border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 600, transition: 'all 0.15s',
+                background: tab === t.id ? 'var(--accent-soft)' : 'var(--bg-elevated)',
+                color: tab === t.id ? 'var(--accent)' : 'var(--text-muted)',
+                borderBottom: tab === t.id ? `2px solid var(--accent)` : '2px solid transparent'
+              }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, overflow: 'hidden', padding: 20 }}>
+        {tab === 'transcript' && <TranscriptViewer record={record} />}
+        {tab === 'analysis' && <AIPanel record={record} />}
+        {tab === 'route' && <RoutePanel record={record} override={override} onSaveRoute={onSaveRoute} />}
+      </div>
+    </div>
+  );
+};
+
+/* ============================================================
+   MANAGER DAILY BRIEF
+   ============================================================ */
+const ManagerDailyBrief = ({ records, overrides }) => {
+  const all = Object.values(records);
+  const calls = all.filter(r => r.source_type === 'call');
+  const meetings = all.filter(r => r.source_type === 'meeting');
+  const withTranscript = all.filter(r => r.has_transcript);
+  const escalations = all.filter(r => (overrides[compositeKey(r)]?.route || r.auto_route) === 'Customer Escalation / Bug');
+  const deals = all.filter(r => (overrides[compositeKey(r)]?.route || r.auto_route) === 'Deal Next Steps');
+
+  const priorities = [
+    {
+      priority: 'P0',
+      color: '#ef4444',
+      bg: 'rgba(239,68,68,0.08)',
+      ref: 'M07',
+      icon: '🚨',
+      title: 'PCI-DSS Violation: Card PAN Exposed in Emails',
+      detail: 'Meeting M07 (post-update transcript) reveals Bug 4 — payment confirmation emails include full card PAN in plaintext since v2.8.3 release. Kiran Raj confirmed hotfix is ready; deployment to happen within 2 hours. Security advisory must be sent to all affected clients. RBI notification required under Digital Payments framework.',
+      owner: 'Kiran Raj (Eng), InfoSec, Compliance',
+      actions: ['Deploy PAN masking hotfix immediately', 'Draft and send client security advisory', 'File RBI notification', 'Priya Sharma: written summary to affected clients within 1 hour of M07']
+    },
+    {
+      priority: 'P1',
+      color: '#f97316',
+      bg: 'rgba(249,115,22,0.08)',
+      ref: 'C08 + M07',
+      icon: '⚡',
+      title: 'Quantum Energy: Transaction Declines + UI Bugs',
+      detail: 'Quantum Energy Solutions (C08, Deepak Nair) reported 3 transaction declines in first month — velocity check misfire (Priya Sharma confirmed system-side). Same client participated in M07 bug triage. Double customer risk: churn probability elevated.',
+      owner: 'Priya Sharma, Payments Ops',
+      actions: ['Ops team to call Deepak Nair within 2 hours (C08)', 'Fix velocity config on Quantum account today', 'Ensure M07 written summary reaches Deepak']
+    },
+    {
+      priority: 'P1',
+      color: '#f97316',
+      bg: 'rgba(249,115,22,0.08)',
+      ref: 'M03 + C04',
+      icon: '💳',
+      title: 'Prepaid vs. Credit Expectation Gap — Starfield Logistics',
+      detail: 'Call C04 (Sneha Patel) revealed Starfield Logistics wants corporate credit cards, not prepaid — credit eligibility assessment needed. Meeting M03 covers the same onboarding confusion. Risk: customer expects credit approval that has NOT been granted yet. Manager must ensure Sneha has not overpromised credit limits.',
+      owner: 'Sneha Patel, Credit Team',
+      actions: ['Credit team to initiate Starfield assessment immediately', 'Sneha to clarify: no credit is approved yet (avoid overpromise)', 'Resolve M03 onboarding expectation gap']
+    },
+    {
+      priority: 'P2',
+      color: '#f59e0b',
+      bg: 'rgba(245,158,11,0.08)',
+      ref: 'C01 + C06 + C10 + C15',
+      icon: '🏆',
+      title: 'Cold Call Coaching Required — Multiple Reps',
+      detail: 'C01 (Arjun): No value prop delivered before rejection. C06 (Kavya): ERP objection not handled. C10 (Sneha): Gatekeeper not navigated, second call lacked hook. C15 (Rohan): Did not qualify out cash-heavy prospect early. All four calls represent coaching opportunities.',
+      owner: 'Sales Manager',
+      actions: ['Schedule 1:1 coaching for Arjun on opener scripts', 'ERP objection handling workshop for Kavya', 'Gatekeeper + hook training for Sneha', 'Qualification framework review for Rohan']
+    },
+    {
+      priority: 'P2',
+      color: '#f59e0b',
+      bg: 'rgba(245,158,11,0.08)',
+      ref: 'M02',
+      icon: '🤝',
+      title: 'Vendor Partnership: BankLink API Evaluation',
+      detail: 'M02 is a full-hour vendor evaluation meeting for BankLink API integration. No transcript available yet — outcome unknown. Critical for payment infrastructure. Manager should chase meeting notes or recording.',
+      owner: 'Vikram Singh',
+      actions: ['Follow up with Vikram Singh for BankLink meeting notes', 'Evaluate BankLink API against current payment stack']
+    },
+    {
+      priority: 'P3',
+      color: '#22c55e',
+      bg: 'rgba(34,197,94,0.08)',
+      ref: 'C03 + C09 + C07 + C16',
+      icon: '🎯',
+      title: 'High-Priority Deals: Near-Closure Pipeline',
+      detail: 'C03 Meridian Pharma (Rohan): MSA/DPA to send, close after Aug 28. C09 UrbanRoot (Rohan): Legal review underway, sign expected in 3–4 days. C07 Prism Digital (Arjun): Onboarding link sent, close this week. C16 Lumina EdTech (Sneha): Series B, CFO demo Tuesday.',
+      owner: 'Rohan Verma, Arjun Mehta, Sneha Patel',
+      actions: ['Rohan: Send Meridian MSA + DPA today', 'Rohan: Follow up UrbanRoot legal in 3–4 days', 'Arjun: Confirm Prism Digital onboarding link received', 'Sneha: Confirm Lumina CFO demo invite sent']
+    },
+  ];
+
+  const repSummary = useMemo(() => {
+    const summary = {};
+    calls.forEach(r => {
+      const rep = r.rep_name;
+      if (!summary[rep]) summary[rep] = { total: 0, withTranscript: 0, deals: 0, escalations: 0, coaching: 0 };
+      summary[rep].total++;
+      if (r.has_transcript) summary[rep].withTranscript++;
+      const route = overrides[compositeKey(r)]?.route || r.auto_route;
+      if (route === 'Deal Next Steps') summary[rep].deals++;
+      if (route === 'Customer Escalation / Bug') summary[rep].escalations++;
+      if (route === 'Sales Coaching') summary[rep].coaching++;
+    });
+    return summary;
+  }, [records, overrides]);
+
+  return (
+    <div style={{ height: '100%', overflowY: 'auto', padding: 24 }}>
+      {/* Header */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 22, fontWeight: 800, background: 'linear-gradient(135deg, #4f7cff, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: 4 }}>
+          📋 Manager Daily Brief
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>21 August 2026 · Asia/Kolkata · {all.length} records processed · {withTranscript.length} transcripts available</div>
+      </div>
+
+      {/* Stats Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 12, marginBottom: 24 }}>
+        {[
+          { label: 'Total Records', value: all.length, color: '#4f7cff' },
+          { label: 'Calls', value: calls.length, color: '#06b6d4' },
+          { label: 'Meetings', value: meetings.length, color: '#a855f7' },
+          { label: 'Deal Pipeline', value: deals.length, color: '#22c55e' },
+          { label: 'Escalations', value: escalations.length, color: '#ef4444' },
+          { label: 'With Transcripts', value: withTranscript.length, color: '#f59e0b' },
+        ].map(s => (
+          <div key={s.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
+            <div style={{ fontSize: 24, fontWeight: 800, color: s.color }}>{s.value}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, marginTop: 2 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Priority Items */}
+      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 12, letterSpacing: '0.5px' }}>⚡ PRIORITY ACTION ITEMS</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
+        {priorities.map((p, i) => (
+          <div key={i} style={{ background: p.bg, border: `1px solid ${p.color}44`, borderRadius: 12, padding: '14px 16px', borderLeft: `4px solid ${p.color}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <span style={{ padding: '2px 8px', borderRadius: 4, background: p.color+'22', color: p.color, fontSize: 11, fontWeight: 800 }}>{p.priority}</span>
+              <span>{p.icon}</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{p.title}</span>
+              <span className="mono" style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>[{p.ref}]</span>
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 10 }}>{p.detail}</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: p.color, marginBottom: 6 }}>Owner: {p.owner}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {p.actions.map((a, j) => (
+                <div key={j} style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+                  <span style={{ color: p.color, flexShrink: 0 }}>→</span>
+                  <span>{a}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Rep Summary Table */}
+      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 12, letterSpacing: '0.5px' }}>📊 REP ACTIVITY SUMMARY — 21 AUG 2026</div>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 28 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: 'var(--bg-elevated)' }}>
+              {['Rep Name', 'Total Calls', 'Transcripts', 'Deal Calls', 'Escalations', 'Coaching Flags'].map(h => (
+                <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.4px', borderBottom: '1px solid var(--border)' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(repSummary).map(([rep, s]) => (
+              <tr key={rep} style={{ borderBottom: '1px solid var(--border)' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <td style={{ padding: '10px 14px', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{rep}</td>
+                <td style={{ padding: '10px 14px', fontSize: 13, color: 'var(--accent)' }}>{s.total}</td>
+                <td style={{ padding: '10px 14px', fontSize: 13, color: 'var(--cyan)' }}>{s.withTranscript}/{s.total}</td>
+                <td style={{ padding: '10px 14px', fontSize: 13, color: 'var(--green)' }}>{s.deals}</td>
+                <td style={{ padding: '10px 14px', fontSize: 13, color: 'var(--red)' }}>{s.escalations}</td>
+                <td style={{ padding: '10px 14px', fontSize: 13, color: s.coaching > 0 ? 'var(--amber)' : 'var(--text-muted)' }}>{s.coaching}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+/* ============================================================
+   EXPORT ENGINE
+   ============================================================ */
+const exportManifest = (records, overrides) => {
+  const rows = Object.values(records).map(r => {
+    const key = compositeKey(r);
+    const override = overrides[key];
+    const route = override?.route || r.auto_route;
+    const cfg = ROUTE_CONFIG[route] || ROUTE_CONFIG['Unprocessed / Low Signal'];
+    return {
+      source_type: r.source_type,
+      source_id: r.source_id,
+      record_ref: r.record_ref,
+      applied_revision: r.revision,
+      route,
+      output_path: cfg.folder + `${r.record_ref}_${r.source_id.slice(0,8)}.json`,
+      review_state: r.has_transcript ? 'reviewed' : 'pending',
+      manual_override: override?.manual_override || false,
+      analysis_freshness: r.has_transcript ? 'current' : 'no_transcript',
+      notes: override?.notes || null,
+    };
+  });
+  const manifest = { generated_at: new Date().toISOString(), date_scope: '2026-08-21', timezone: 'Asia/Kolkata', total_records: rows.length, records: rows };
+  const blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `rii_manifest_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+const exportCSV = (records, overrides) => {
+  const header = ['source_type','source_id','record_ref','applied_revision','route','output_path','review_state','manual_override','analysis_freshness'];
+  const rows = Object.values(records).map(r => {
+    const key = compositeKey(r);
+    const override = overrides[key];
+    const route = override?.route || r.auto_route;
+    const cfg = ROUTE_CONFIG[route] || ROUTE_CONFIG['Unprocessed / Low Signal'];
+    return [
+      r.source_type, r.source_id, r.record_ref, r.revision,
+      `"${route}"`, cfg.folder + `${r.record_ref}_${r.source_id.slice(0,8)}.json`,
+      r.has_transcript ? 'reviewed' : 'pending', override?.manual_override || false,
+      r.has_transcript ? 'current' : 'no_transcript'
+    ].join(',');
+  });
+  const csv = [header.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `rii_manifest_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+/* ============================================================
+   NOTIFICATION TOAST
+   ============================================================ */
+const Toast = ({ message, type, onClose }) => {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3000);
+    return () => clearTimeout(t);
+  }, [message]);
+  return (
+    <div style={{ position: 'fixed', bottom: 24, right: 24, padding: '12px 20px', borderRadius: 10, background: type === 'success' ? '#14532d' : '#7f1d1d', border: `1px solid ${type === 'success' ? '#22c55e' : '#ef4444'}`, color: '#fff', fontSize: 13, fontWeight: 600, zIndex: 9999, animation: 'fadeIn 0.2s ease', display: 'flex', gap: 8, alignItems: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+      {type === 'success' ? '✅' : '❌'} {message}
+    </div>
+  );
+};
+
+/* ============================================================
+   MAIN APP
+   ============================================================ */
+const App = () => {
+  const [state, setState] = useState(loadState);
+  const [toast, setToast] = useState(null);
+
+  const notify = (msg, type = 'success') => setToast({ msg, type });
+
+  useEffect(() => { saveState(state); }, [state]);
+
+  const applyBatchToState = useCallback((batchId, batch) => {
+    let result;
+    setState(prev => {
+      const alreadyLoaded = prev.loadedBatches.includes(batchId);
+      const { records: newRecords, stats } = applyBatch(prev.records, batch);
+      const newState = {
+        ...prev,
+        records: newRecords,
+        loadedBatches: alreadyLoaded ? prev.loadedBatches : [...prev.loadedBatches, batchId],
+      };
+      result = { alreadyLoaded, stats, totalCount: Object.keys(newRecords).length };
+      return newState;
+    });
+    return result || {};
+  }, []);
+
+  const resetState = useCallback(() => {
+    const fresh = { records: {}, overrides: {}, loadedBatches: [], selectedKey: null, activeTab: 'inbox', filters: { sourceType: 'all', person: 'all' } };
+    setState(fresh);
+    notify('State cleared', 'success');
+  }, []);
+
+  const saveRoute = useCallback((key, route, notes) => {
+    setState(prev => ({
+      ...prev,
+      overrides: {
+        ...prev.overrides,
+        [key]: { ...prev.overrides[key], route, notes, manual_override: true, updated_at: new Date().toISOString() }
+      }
+    }));
+    notify('Route override saved', 'success');
+  }, []);
+
+  const setFilters = useCallback((fn) => {
+    setState(prev => ({ ...prev, filters: typeof fn === 'function' ? fn(prev.filters) : fn }));
+  }, []);
+
+  const setActiveTab = useCallback((tab) => {
+    setState(prev => ({ ...prev, activeTab: tab }));
+  }, []);
+
+  const setSelectedKey = useCallback((key) => {
+    setState(prev => ({ ...prev, selectedKey: key }));
+  }, []);
+
+  const { records, overrides, loadedBatches, selectedKey, activeTab, filters } = state;
+
+  const filteredRecords = useMemo(() => {
+    let arr = Object.values(records);
+    if (filters.sourceType !== 'all') arr = arr.filter(r => r.source_type === filters.sourceType);
+    if (filters.person !== 'all') arr = arr.filter(r => {
+      const p = r.source_type === 'call' ? r.rep_name : r.organizer_email;
+      return p === filters.person;
+    });
+    return arr.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  }, [records, filters]);
+
+  const selectedRecord = selectedKey ? records[selectedKey] : null;
+  const selectedOverride = selectedKey ? overrides[selectedKey] : null;
+
+  return (
+    <div id="root-app" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <TopBar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      {activeTab === 'inbox' && (
+        <>
+          <MetricsBar records={records} overrides={overrides} filters={filters} setFilters={setFilters} notify={notify} />
+          <ReplayPanel loadedBatches={loadedBatches} onLoad={applyBatchToState} onReset={resetState} notify={notify} />
+
+          {/* Export Bar */}
+          <div style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)', padding: '8px 20px', display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.5px' }}>📤 EXPORT:</span>
+            <button id="export-json" className="btn btn-secondary" onClick={() => { exportManifest(records, overrides); notify('JSON manifest downloaded', 'success'); }}>⬇ JSON Manifest</button>
+            <button id="export-csv" className="btn btn-secondary" onClick={() => { exportCSV(records, overrides); notify('CSV manifest downloaded', 'success'); }}>⬇ CSV Manifest</button>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>Folders: deals/ · support/ · coaching/ · vendor/ · unprocessed/</span>
+            <div style={{ flex: 1 }}></div>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{filteredRecords.length} records shown</span>
+          </div>
+
+          {/* Main Split Layout */}
+          <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            {/* Left: Inbox Feed */}
+            <div style={{ width: 340, flexShrink: 0, borderRight: '1px solid var(--border)', overflowY: 'auto', background: 'var(--bg-surface)' }}>
+              {filteredRecords.length === 0 ? (
+                <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <div style={{ fontSize: 36, marginBottom: 12 }}>📭</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, color: 'var(--text-secondary)' }}>No records loaded</div>
+                  <div style={{ fontSize: 12 }}>Use the Replay controls above to load a batch.</div>
+                </div>
+              ) : (
+                filteredRecords.map(r => (
+                  <InboxCard key={compositeKey(r)} record={r} override={overrides[compositeKey(r)]} isSelected={compositeKey(r) === selectedKey} onClick={() => setSelectedKey(compositeKey(r))} />
+                ))
+              )}
+            </div>
+
+            {/* Right: Workspace */}
+            <div style={{ flex: 1, overflow: 'hidden', background: 'var(--bg-base)' }}>
+              <ConversationWorkspace record={selectedRecord} override={selectedOverride} onSaveRoute={saveRoute} />
+            </div>
+          </div>
+        </>
+      )}
+
+      {activeTab === 'brief' && (
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          <ManagerDailyBrief records={records} overrides={overrides} />
+        </div>
+      )}
+
+      {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
+    </div>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>

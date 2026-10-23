@@ -1,0 +1,48 @@
+{
+  "batch_id": "02_update",
+  "batch_date": "2026-08-21",
+  "timezone": "Asia/Kolkata",
+  "records": [
+    {
+      "source_type": "meeting",
+      "source_id": "4f304fff-fd40-5cfc-a366-0a134c445c2a",
+      "record_ref": "M07",
+      "revision": 2,
+      "title": "UI Payment Bug Triage & Resolution Meeting",
+      "organizer_email": "priya.sharma@volopay.com",
+      "timestamp": "2026-08-21T10:00:00+05:30",
+      "duration_seconds": 3600,
+      "has_transcript": true,
+      "is_silent": false,
+      "auto_route": "Customer Escalation / Bug",
+      "transcript": [
+        { "speaker": "Priya Sharma", "time": "00:00:15", "text": "Alright everyone, let's get started. We have 4 critical payment UI bugs to triage today. I've invited Deepak from Quantum Energy as a reference client, and Kiran from engineering. Let's go through each one." },
+        { "speaker": "Kiran Raj (Eng)", "time": "00:01:05", "text": "Thanks Priya. Bug 1 — the payment confirmation modal is dismissing before the server acknowledgment is received. We're seeing a race condition on slow 4G connections. Affects about 12% of mobile transactions over 4G." },
+        { "speaker": "Deepak Nair (Quantum)", "time": "00:01:58", "text": "This is exactly what we experienced. The transaction appeared successful in the app but was declined on the backend. Our vendor had to call us asking where the payment was." },
+        { "speaker": "Priya Sharma", "time": "00:02:30", "text": "Kiran, what's the fix timeline for Bug 1?" },
+        { "speaker": "Kiran Raj (Eng)", "time": "00:02:45", "text": "We've already pushed a fix to staging. It awaits QA sign-off. Production deployment expected by today EOD." },
+        { "speaker": "Priya Sharma", "time": "00:03:10", "text": "Good. Bug 2 — the payment amount field is accepting amounts above the card limit without showing a real-time validation error, only failing at submission. That's a UX gap." },
+        { "speaker": "Kiran Raj (Eng)", "time": "00:03:45", "text": "Correct. We need to add client-side limit validation that mirrors the server validation. Estimated 2 days of frontend work." },
+        { "speaker": "Deepak Nair (Quantum)", "time": "00:04:20", "text": "Our users were confused — they filled out the entire form, hit submit, and got a cryptic error. They restarted the payment 3 times thinking it was a connection issue." },
+        { "speaker": "Priya Sharma", "time": "00:04:55", "text": "The UX error messaging needs a complete rewrite alongside the validation fix. Kiran, can we ensure the error message is plain English, no error codes?" },
+        { "speaker": "Kiran Raj (Eng)", "time": "00:05:10", "text": "Agreed. We'll update the error copy as part of the same PR." },
+        { "speaker": "Priya Sharma", "time": "00:05:30", "text": "Bug 3 — the bulk payment CSV upload is silently dropping rows when the file has Windows-style CRLF line endings instead of Unix LF. This is a file parsing issue." },
+        { "speaker": "Kiran Raj (Eng)", "time": "00:06:00", "text": "Yes. Our CSV parser wasn't normalizing line endings. Fix is a 1-line code change — already in main branch. Will be in the next release." },
+        { "speaker": "Priya Sharma", "time": "00:06:30", "text": "Good. Bug 4 — the payment confirmation email is including the full card PAN in plaintext. This is a PCI-DSS violation and is the most critical issue today." },
+        { "speaker": "Kiran Raj (Eng)", "time": "00:07:10", "text": "Confirmed. This was introduced in the v2.8.3 release last week when we updated the email template. The fix — masking to last 4 digits — is ready. We need immediate hotfix deployment. I'm recommending we do it within the next 2 hours." },
+        { "speaker": "Deepak Nair (Quantum)", "time": "00:07:55", "text": "We received several of those emails. Our IT team flagged it as a security concern yesterday. I'm glad you're treating it as P0." },
+        { "speaker": "Priya Sharma", "time": "00:08:20", "text": "Kiran, please initiate the hotfix deployment immediately after this call. We also need to send a security advisory email to all affected clients — anyone who received a payment confirmation email since v2.8.3 was deployed." },
+        { "speaker": "Kiran Raj (Eng)", "time": "00:08:50", "text": "Understood. I'll coordinate with InfoSec for the advisory draft. We should also notify RBI as required under the Digital Payments framework." },
+        { "speaker": "Priya Sharma", "time": "00:09:15", "text": "Yes — loop in our Compliance team for the RBI notification. Alright, let's close — Bug 4 is P0/immediate, Bug 1 is EOD, Bugs 2 and 3 are within 48 hours. Any questions?" },
+        { "speaker": "Deepak Nair (Quantum)", "time": "00:09:40", "text": "Will we get written confirmation of the timeline and the security advisory?" },
+        { "speaker": "Priya Sharma", "time": "00:09:55", "text": "Yes Deepak, I'll send a written summary to all affected clients within 1 hour of this meeting ending. Thank you all." }
+      ],
+      "ai_summary": {
+        "executive": "Critical triage meeting resolved 4 UI payment bugs. Bug 4 (PAN exposed in plaintext emails — PCI-DSS violation, introduced in v2.8.3) classified P0 and requires immediate hotfix and client security advisory. Bugs 1, 2, 3 have 2–48 hour resolution windows.",
+        "evidence": "Kiran Raj (Turn 13): 'This was introduced in the v2.8.3 release... The fix — masking to last 4 digits — is ready. I'm recommending we do it within the next 2 hours.' Deepak Nair (Turn 14): 'Our IT team flagged it as a security concern yesterday.'",
+        "negative_scope": "Hotfix not yet deployed at time of meeting end — deployment was to begin immediately after. RBI notification not yet filed — Compliance team to be looped in. Number of affected clients receiving PAN-exposed emails is not quantified in this transcript.",
+        "action_items": "1. Kiran Raj: Deploy PAN masking hotfix within 2 hours (P0). 2. InfoSec + Compliance: Draft and send security advisory to all clients who received confirmation emails since v2.8.3. 3. Compliance: File RBI notification per Digital Payments framework. 4. Priya Sharma: Send written bug timeline summary to affected clients within 1 hour. 5. Engineering: Deploy Bug 1 fix by EOD, Bugs 2 & 3 within 48 hours."
+      }
+    }
+  ]
+}
